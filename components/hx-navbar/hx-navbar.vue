@@ -5,16 +5,20 @@
 		<view
 			:class="{'hx-navbar--fixed': fixed,'hx-navbar--shadow':border,'hx-navbar--border':border}"
 			:style="{'background': backgroundColorRgba}"
-			
 			class="hx-navbar__content">
+			<block v-if="backgroundImg">
+				<image class="navbgimg" :src="backgroundImg" mode=""></image>
+			</block>
+			
 			<view :style="{ height: statusBarHeight }" class="hx-status-bar" v-if="statusBar" ></view>
-			<view :style="{color:color,height: height,'line-height':height}" class="hd hx-navbar__header hx-navbar__content_view">
-				<view class="hx-navbar__header-btns hx-navbar__content_view"  @tap="onClickLeft" v-if="leftSlot">
+			<view :style="{color:colorInfo,height: height,'line-height':height}" class="hd hx-navbar__header hx-navbar__content_view">
+				<view class="hx-navbar__header-btns hx-navbar__content_view"  @tap="onClickLeft" v-if="leftSlot" :style="{'color': colorInfo}">
 					<block v-if="leftText.length || leftIcon.length || back">
 						<view
 							v-if="leftIcon.length || back"
-							class="hx-navbar__content_view">
-							<uni-icons :type="back ? 'arrowleft' : leftIcon" :color="color" size="24"/>
+							:class="back ? 'left_back' : ''"
+							class="hx-navbar__content_view" >
+							<uni-icons :type="back ? 'arrowleft' : leftIcon" :color="colorInfo" size="28"/>
 						</view>
 						<view
 							v-if="leftText.length"
@@ -23,7 +27,9 @@
 						
 					</block>
 					<block v-else>
-						<slot name="left"/>
+						<slot name="leftAfter" v-if="leftSlidiSwitch && slotSlidiSwitch == 1" />
+						<slot name="left" v-else/>
+						
 					</block>
 				</view>
 			  
@@ -34,19 +40,30 @@
 					  class="hx-navbar__header-container-inner hx-navbar__content_view">{{ title }}</view>
 					<!-- 标题插槽 -->
 				
-					<block v-else><slot/></block>
+					<block v-else>
+						<slot name="centerAfter" v-if="centerSlidiSwitch && slotSlidiSwitch == 1"/>
+						<slot v-else/>
+						
+					</block>
 				</view>
 				
 				<view :class="title.length?'hx-navbar__header-btns-right':''"
 					class="hx-navbar__header-btns hx-navbar__content_view"
 					@tap="onClickRight"
 					v-if="rightSlot">
-					<view v-if="rightIcon.length" class="hx-navbar__content_view">
-						<uni-icons :type="rightIcon" :color="color" size="24"/>
-					</view>
 					<!-- 优先显示图标 -->
-					<view v-if="rightText.length&&!rightIcon.length" class="hx-navbar-btn-text hx-navbar__content_view">{{ rightText }}</view>
-					<slot name="right"/>
+					<block v-if="rightIcon.length || rightText.length">
+						<view  class="hx-navbar__content_view" v-if="rightIcon.length">
+							<uni-icons :type="rightIcon" :color="colorInfo" size="28"/>
+						</view>
+						<view v-if="rightText.length" class="hx-navbar-btn-text hx-navbar__content_view">{{ rightText }}</view>
+					</block>
+					<block v-else>
+						<slot name="rightAfter"  v-if="rightSlidiSwitch && slotSlidiSwitch == 1"/>
+						<slot name="right" v-else/>
+					</block>
+					
+					
 				</view>
 			  
 			</view>
@@ -81,11 +98,13 @@
 				 statusBarFontColorInfo: [],
 				 backgroundColorRgba: 'rgba(255,255,255,1)',
 				 backgroundColorRgb: 'rgb(222,222,222)',
-				 
+				 colorInfo: '#000000',
 				 placeholder: false,
+				 colorContainer: null,
+				 slotSlidiSwitch: 0
+				 
 			};
 		},
-		
 		props:{
 			height:{
 				type: String,
@@ -144,8 +163,8 @@
 			},
 			//文字颜色
 			color: {
-			  type: String,
-			  default: "#666666"
+			  type: [Array,String],
+			  default: "#000000"
 			},
 			//导航栏背景颜色
 			backgroundColor: {
@@ -191,11 +210,36 @@
 			  type: [String, Boolean],
 			  default: false
 			},
+			//跳至普通页面
+			defaultBackUrl: {
+			  type: String,
+			  default: ''
+			},
+			//跳至tabber页面
+			backTabbarUrl: {
+			  type: String,
+			  default: '/pages/index/index'
+			},
+			//滑动后切换左插槽
+			leftSlidiSwitch:{
+				type: [Boolean,String],
+				default: false,
+			},
+			//滑动后切换中间插槽
+			centerSlidiSwitch:{
+				type: [Boolean,String],
+				default: false
+			},
+			//滑动后切换右插槽
+			rightSlidiSwitch:{
+				type: [Boolean,String],
+				default: false
+			},
+			
 			
 		},
 		created(){
 			var that = this;
-			
 			//是否添加占位符
 			switch (that.barPlaceholder){
 				case 'show':
@@ -214,6 +258,9 @@
 			//设置状态栏文字颜色
 			that.setStatusBarFontColor();
 
+			//文字颜色
+			that.colorContainer = typeof that.color == 'object' ?  that.color : [that.color,that.color];
+			that.colorInfo = that.colorContainer[0];
 			//导航栏透明设置 及监听滚动
 			switch (that.transparent){
 				case 'show':
@@ -228,12 +275,14 @@
 					//监听当前页滚动条
 					// #ifndef H5
 					currentPages[currentPages.length-1].onPageScroll = function(e) {
+						
 						that.$emit('scroll', e);
 						if (e.scrollTop > 100) {
 							that.transparentValue = 1;
-							
+							that.colorInfo = that.colorContainer[1];
 						} else {
 							that.transparentValue = e.scrollTop / 100;
+							that.colorInfo = that.colorContainer[0];
 						}
 						that.setBgColor();
 					};
@@ -244,9 +293,13 @@
 						that.$emit('scroll', { scrollTop: scrollTop });
 						if (scrollTop > 100) {
 							that.transparentValue = 1;
+							that.colorInfo = that.colorContainer[1];
 						} else {
 							that.transparentValue = scrollTop / 100;
+							that.colorInfo = that.colorContainer[0];
 						}
+						//返回更新的字体颜色
+						that.$emit('updateNavColor',{color:that.colorInfo})
 						that.setBgColor();
 					};
 					// #endif
@@ -254,15 +307,116 @@
 			}
 			that.setBgColor();
 			
+			//滑动切换
+			if(that.fixed && (that.leftSlidiSwitch || that.centerSlidiSwitch || that.rightSlidiSwitch)){
+				//获取所有活动页面
+				let currentPages = getCurrentPages();
+				//监听当前页滚动条
+				// #ifndef H5
+				currentPages[currentPages.length-1].onPageScroll = function(e) {
+					that.$emit('scroll', e);
+					if (e.scrollTop > 100) {
+						that.slotSlidiSwitch = 1;
+					} else {
+						that.slotSlidiSwitch = 0
+					}
+				};
+				// #endif
+				// #ifdef H5
+				window.onscroll = function(e) {
+					let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+					that.$emit('scroll', { scrollTop: scrollTop });
+					if (scrollTop > 100) {
+						that.slotSlidiSwitch = 1;
+					} else {
+						that.slotSlidiSwitch = 0
+					}
+				};
+				// #endif
+			}
 			
+		},
+		watch:{
+			//监控透明度变化 
+			transparentValue(val,oldVal) {
+				var that = this;
+				//this.settingColor();
+				
+				//头条小程序不支持setNavigationBarColor方法
+				// #ifndef MP-TOUTIAO || H5
+				if(oldVal > 0.8){
+					uni.setNavigationBarColor({
+						frontColor: that.statusBarFontColorInfo[1],
+						backgroundColor: that.backgroundColorRgb
+					});
+				}else if(oldVal < 0.2){
+					uni.setNavigationBarColor({
+						frontColor: that.statusBarFontColorInfo[0],
+						backgroundColor:  that.backgroundColorRgb
+					});
+				}
+				// #endif
+				
+				// #ifdef MP-TOUTIAO
+				if (tt.setNavigationBarColor) {
+				 if(oldVal > 0.8){
+				 	tt.setNavigationBarColor({
+				 	  frontColor: that.statusBarFontColorInfo[1],
+				 	  backgroundColor: that.backgroundColorRgb,
+				 	  success(res) {},
+				 	  fail(res) {}
+				 	});
+				 }else if(oldVal < 0.2){
+				 	tt.setNavigationBarColor({
+				 	    frontColor: that.statusBarFontColorInfo[0],
+				 	    backgroundColor: that.backgroundColorRgb,
+				 		success(res) {},
+				 		fail(res) {}
+				 	});
+				 }
+				} else {
+				  console.log("hx-navbar 提示：当前客户端版本过低，无法使用状态栏颜色修改功能，请升级（基础库1.40+）。")
+				}
+				// #endif
+				
+				
+			},
+			//监听背景颜色
+			backgroundColor(val,old){
+				var that = this;
+				that.setBgColor()
+			},
+		
+			color(val,old){
+				var that = this;
+				//文字颜色
+				that.colorContainer = typeof val == 'object' ?  val : [val,val];
+				that.colorInfo = that.colorContainer[0];
+				
+			}
 		},
 		methods: {
 			
 			onClickLeft () {
 				if(this.back){
-					uni.navigateBack({
-						delta: 1
-					});
+					if(getCurrentPages().length>1){
+						uni.navigateBack();
+					}else{
+						if(this.defaultBackUrl){
+							uni.redirectTo({
+								url:this.defaultBackUrl
+							})
+						}else{
+							if(this.backTabbarUrl){
+								uni.reLaunch({
+									url: this.backTabbarUrl
+								});
+							}
+							
+						}
+						
+					}
+					
 				}else{
 					this.$emit('click-left')
 				}
@@ -272,12 +426,14 @@
 		    }, 
 			//背景颜色
 			setBgColor(){
+				
 				var that = this;
 				//如果存在背景图片则背景颜色失效
-				if(that.backgroundImg){
-					that.backgroundColorRgba = "url(" + that.backgroundImg + ")";
-					return;
-				}
+				// if(that.backgroundImg){
+				// 	that.backgroundColorRgba = "url(" + that.backgroundImg + ")";
+				// 	return;
+				// }
+				
 				//背景颜色
 				if(typeof that.backgroundColor[0] == 'object'){
 					let l = that.backgroundColor.length;
@@ -295,12 +451,12 @@
 						rgbStr += ")"; 
 						that.backgroundColorRgba = rgbStr;
 					}
+					
 				}else{
 					let rgbStr = that.backgroundColor[0] + ','+  that.backgroundColor[1] + ','+  that.backgroundColor[2];
 					that.backgroundColorRgb= 'rgb('+ rgbStr + ')';
 					that.backgroundColorRgba = 'rgba('+ rgbStr +',' + that.transparentValue+')';
 				}
-
 			},
 			setStatusBarFontColor(){
 			  var that = this;
@@ -313,36 +469,27 @@
 					that.statusBarFontColorInfo = [that.statusBarFontColor[0],that.statusBarFontColor[1]];
 				}
 			  }
-			  
+			  // #ifndef MP-TOUTIAO || H5
 			  uni.setNavigationBarColor({
 				frontColor: that.statusBarFontColorInfo[0],
 				backgroundColor: that.backgroundColorRgb
 			  });
+			   // #endif
+			   
+			  // #ifdef MP-TOUTIAO
+			  if (tt.setNavigationBarColor) {
+			    tt.setNavigationBarColor({
+			      frontColor: that.statusBarFontColorInfo[0],
+			      backgroundColor: that.backgroundColorRgb
+			    });
+			  } else {
+			     console.log("hx-navbar 提示：当前客户端版本过低，无法使用状态栏颜色修改功能，请升级（基础库1.40+）。")
+			  }
+			  // #endif
 			}
 		  
 		},
-		//监控
-		computed: {
-			//监控透明度变化
-			setNavStatusBarFontcolor() {
-				var that = this;
-				//this.settingColor();
-				if(this.transparentValue > 0.8){
-					
-					uni.setNavigationBarColor({
-						frontColor: that.statusBarFontColorInfo[1],
-						backgroundColor: that.backgroundColorRgb
-					});
-				}else if(this.transparentValue < 0.2){
-					uni.setNavigationBarColor({
-						frontColor: that.statusBarFontColorInfo[0],
-						backgroundColor:  that.backgroundColorRgb
-					});
-				}
-				return this.transparentValue;
-				
-			}
-			
+		destroyed(){
 			
 		},
 		
@@ -378,22 +525,22 @@
 		
 		padding-top: 0;
 		overflow: hidden;
-		/* #ifdef MP */
-		padding-right: 190upx;
-		/* #endif */
-		/* #ifdef MP-WEIXIN */
-		padding-right: 220upx;
-		/* #endif */
-		/* #ifdef MP-ALIPAY */
-		padding-right: 150upx;
-		/* #endif */
+		
 		&__content {
 			display: block;
 			position: relative;
 			width: 100%;
 			background-color: $uni-bg-color;
+			overflow: hidden;
 			
-	
+			.navbgimg{
+				position: absolute;
+				top: 0;
+				left: 0;
+				
+				z-index: -1;
+				width: 100%;
+			}
 			.hx-navbar__content_view {
 				// line-height: $nav-height;
 				display: flex;
@@ -407,13 +554,13 @@
 			width: 100%;
 			height:  $nav-height;
 			line-height: $nav-height;
-			font-size: 16px;
-	
+			font-size: 36upx;
+			transition: color 0.5s ease 0s;
 			&-btns {
 				display: inline-flex;
 				flex-wrap: nowrap;
 				flex-shrink: 0;
-				width: 120upx;
+				min-width: 120upx;
 				padding: 0 12upx;
 	
 				&:first-child {
@@ -421,7 +568,7 @@
 				}
 	
 				&:last-child {
-					width: 60upx;
+					min-width: 108upx;
 				}
 	
 	    &-right:last-child{
@@ -439,7 +586,8 @@
 					width: 100%;
 					display: flex;
 					justify-content: center;
-					font-size: 30upx;
+					font-size: 36upx;
+					
 					// padding-right: 60upx;
 				}
 			}
@@ -473,5 +621,9 @@
 			transform: scaleY(.5);
 			background-color: $uni-border-color;
 		}
+	}
+	.left_back{
+		padding-left: 12upx;
+		padding-right: 12upx;
 	}
 </style>
