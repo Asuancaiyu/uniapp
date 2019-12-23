@@ -35,38 +35,49 @@ Vue.component('hx-navbar',hxNavbar)
 
 
 ### 属性
+#### 基本属性 
 | 名称                        | 类型            | 默认值                | 描述                                               |
 | ----------------------------|--------------- | ---------------------- | ---------------------------------------------------|
 | back                   	  | Boolean         | true          | 返回上一页，（设置后，```leftIcon```属性，和```click-left```事件将失效|
 | height                   	  | String         | 44px          | 导航栏高度（不包含状态栏高度）|
-| statusBar                   | Boolean         | true          | 包含状态栏|
 | barPlaceholder              | String         | auto          | 导航栏占位符 显示（show），隐藏（hidden），自动（auto：如果头部为固定fixed ，则显示占位符）               |
 | title                       | String         | -             | 导航标题（当设置了标题，中间插槽将失效）                                     |
-| leftSlot                    | Boolean        | true          | 开启左插槽                                        |
-| rightSlot                   | Boolean        | true          | 开启右插槽                                      |
-| leftIcon                    | String         | -             | 左插槽图标，必须为 ```uni-icons``` 图标                                       |
-| rightIcon   				  | String         | -             | 左插槽图标，必须为 ```uni-icons``` 图标  |
-| fixed                       | Boolean        | false         | 固定头部|
+| fixed                       | Boolean        | false         | 固定头部											|
 | color                       | String         | #000000       | 导航文字颜色（如果需要屏幕滑动后变色，参数则为数组，例子：`['#000000','#ffffff']`）                                        |
 | backgroundColor             | Array          | [255, 255, 255]          | 导航背景颜色为RGB 编号（单色背景数组为```[255,255,255]```，线性渐变背景```[[236, 0, 140],[103, 57, 182],...]```）                                      |
 | backgroundColorLinearDeg    | String         | 45             | 导航背景线性渐变角度                                       |
 | backgroundImg   			  | String         | -             | 导航背景图片（背景图片优先级高于背景颜色）  |
 | transparent   			  | String         | show             | 背景透明（show 不透明,hidden 透明,auto 自动：滑动逐渐显示背景颜色，当头部固定时生效） 兼容性：头条小程序必须在页面上加 onPageScroll(e){} ，才能滑动显示背景，可参考dome7|
-| statusBarFontColor          | Array,String   | #000000         | 状态栏字体颜色，只支持```#000000 ```和```#FFFFFF```（如果需要屏幕滑动变色，参数则为数组，例子：```['#000000','#ffffff']```）|
 | shadow                      | Boolean         | false         | 导航栏阴影          |
 | border                      | Boolean         | false         | 导航栏边框                           |
+
+#### 关于状态栏的属性
+| 名称                        | 类型            | 默认值                | 描述                                               |
+| ----------------------------|--------------- | ---------------------- | ---------------------------------------------------|
+| statusBar                   | Boolean         | true       		   | 包含状态栏												|
+| statusBarFontColor          | Array,String   | #000000               | 状态栏字体颜色，只支持```#000000 ```和```#FFFFFF```（如果需要屏幕滑动变色，参数则为数组，例子：```['#000000','#ffffff']```）|
+
+#### 关于插槽的属性
+| 名称                        | 类型            | 默认值                | 描述                                               |
+| ----------------------------|--------------- | ---------------------- | ---------------------------------------------------|
+| leftIcon                    | String         | -             | 左插槽图标，必须为 ```uni-icons``` 图标                                       |
+| rightIcon   				  | String         | -             | 右插槽图标，必须为 ```uni-icons``` 图标  |
+| leftSlot                    | Boolean        | true          | 开启左插槽                                        |
+| rightSlot                   | Boolean        | true          | 开启右插槽                                      |
 | leftSlidiSwitch             | Boolean         | false         | 屏幕滑动后 `left`插槽切换为`leftAfter`插槽                       |
 | centerSlidiSwitch           | Boolean         | false         | 屏幕滑动后 `default`插槽切换为`centerAfter`插槽                            |
 | rightSlidiSwitch            | Boolean         | false         | 屏幕滑动后 `right`插槽切换为`rightAfter`插槽                            |
 
-### 作者专用属性
+
+#### 返回上一页为空时的处理属性
 | 名称                        | 类型            | 默认值                | 描述                                               |
 | ----------------------------|--------------- | ---------------------- | ---------------------------------------------------|
 | backTabbarUrl               | String         | /pages/index/index     | 返回至指定的tabber页面（返回首页），当上一页为空时生效；全局使用推荐进组件修改`backTabbarUrl`的默认值|
 | defaultBackUrl              | String         | -          			| 返回至指定的普通页面，当上一页为空时生效；`defaultBackUrl`优先级高于`backTabbarUrl`；主要应用在返回失效时|
 
 ``` html
-<!-- 使用场景：假如刷新了当前页面，那么返回事件将失效。这时用上 `defaultBackUrl` 或 `backTabbarUrl` 则能返回至指定页面-->
+<!-- 使用场景：假如刷新了当前页面，那么返回事件将失效。
+这时用上 `defaultBackUrl` 或 `backTabbarUrl` 则能返回至指定页面-->
 <hx-navbar left-text="关于" defaultBackUrl="/pages/user/setting/setting" />
 ```
 
@@ -81,19 +92,21 @@ Vue.component('hx-navbar',hxNavbar)
 | centerAfter           | 屏幕滑动后的中插槽 （需要开启`centerSlidiSwitch`属性才生效）                  |
 | rightAfter            | 屏幕滑动后的右插槽 （需要开启`rightSlidiSwitch`属性才生效）                  |
 
-### 事件
-| 名称             | 参数              | 描述                      |
-| -----------------|------------------| --------------------------|
-| click-left       | -                | 左侧按钮点击时触发          |
-| click-right      | -                | 右侧按钮点击时触发          |
 
 ``` html
 <hx-navbar>
-    <view>标题栏</view>
-    <view slot="left">left</view>
-    <view  slot="right">right</view>
+    <view>标题栏（中间插槽）</view>
+    <view slot="left">left（左插槽）</view>
+    <view  slot="right">right（右插槽）</view>
 </hx-navbar>
 ```
+
+
+### 事件
+| 名称             | 参数              | 描述                      |
+| -----------------|------------------| --------------------------|
+| click-left       | -                | 左侧按钮点击时触发，此事件将覆盖 `返回`          |
+| click-right      | -                | 右侧按钮点击时触发          |
 
 
 ## 使用例子
