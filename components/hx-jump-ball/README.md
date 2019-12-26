@@ -4,6 +4,8 @@
 
 本组件目前兼容H5、5+APP。
 
+ ![image](https://github.com/Asuancaiyu/uniapp/blob/master/components/hx-jump-ball/demo.gif)
+
 ### 本组件支持模式：
 1. 主要应用在购物车添加商品时的动态效果  
 
