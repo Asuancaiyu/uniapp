@@ -34,10 +34,12 @@
 				</view>
 			  
 			  
-				<view class="hx-navbar__header-container hx-navbar__content_view">
+				<view class="hx-navbar__header-container hx-navbar__content_view" :style="'width: calc(100% - ' + (menuButtonInfo.width + 60) + 'px)'">
 					<view
 					  v-if="title.length"
-					  class="hx-navbar__header-container-inner hx-navbar__content_view">{{ title }}</view>
+					  class="hx-navbar__header-container-inner hx-navbar__content_view">
+						<view>{{ title }}</view>
+					</view>
 					<!-- 标题插槽 -->
 				
 					<block v-else>
@@ -84,6 +86,8 @@
 	import uniIcons from '../uni-icons/uni-icons.vue'
 	//获取系统状态栏高度
 	var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
+	// 获取右上角胶囊布局信息
+	var menuButtonInfo = uni.getMenuButtonBoundingClientRect();
 	export default {
 		name: "hx-navbar",
 		components: {
@@ -91,6 +95,7 @@
 		},
 		data() {
 			return {
+				 menuButtonInfo,
 				 statusBarHeight: statusBarHeight,
 				 transparentValue: 0,
 				 navTransparentFixedFontColor: '#fff',
@@ -579,7 +584,7 @@
 			}
 	
 			&-container {
-				width: 100%;
+				/*width: 100%;*/
 				margin: 0 10upx;
 	
 				&-inner {
@@ -587,7 +592,13 @@
 					display: flex;
 					justify-content: center;
 					font-size: 36upx;
-					
+					view {
+						display:inline-block;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+						overflow: hidden;
+						max-width: 100%;
+					}
 					// padding-right: 60upx;
 				}
 			}
