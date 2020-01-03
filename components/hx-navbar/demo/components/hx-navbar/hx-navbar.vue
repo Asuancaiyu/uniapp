@@ -1,7 +1,8 @@
+
 <template>
 	
-	<view class="hx-navbar">
-		<!-- 搜索 -->
+	<view class="hx-navbar" >
+
 		<view
 			:class="{'hx-navbar--fixed': fixed,'hx-navbar--shadow':border,'hx-navbar--border':border}"
 			:style="{'background': backgroundColorRgba}"
@@ -10,7 +11,7 @@
 				<image class="navbgimg" :src="backgroundImg" mode=""></image>
 			</block>
 			
-			<view :style="{ height: statusBarHeight }" class="hx-status-bar" v-if="statusBar" ></view>
+			<view :style="{ height: statusBarHeight ,'background': statusBarBackground}" class="hx-status-bar" v-if="statusBar" ></view>
 			<view :style="{color:colorInfo,height: height,'line-height':height}" class="hd hx-navbar__header hx-navbar__content_view">
 				<view class="hx-navbar__header-btns hx-navbar__content_view"  @tap="onClickLeft" v-if="leftSlot" :style="{'color': colorInfo}">
 					<block v-if="leftText.length || leftIcon.length || back">
@@ -74,7 +75,7 @@
 		<view
 		  v-if="placeholder" 
 		  class="hx-navbar__placeholder">
-		  <view :style="{ height: statusBarHeight }" class="hx-status-bar" v-if="statusBar" ></view>
+		  <view :style="{ height: statusBarHeight}" class="hx-status-bar" v-if="statusBar" ></view>
 		 
 		  <view :style="{ height: height}" />
 		</view>
@@ -204,6 +205,11 @@
 			statusBar: {
 			  type: [Boolean, String],
 			  default: true
+			},
+			//状态栏背景颜色
+			statusBarBackground:{
+				type: String,
+				default: ''
 			},
 			//导航栏阴影
 			shadow: {
@@ -508,12 +514,7 @@
 	.hd{
 		overflow: hidden;
 	}
-	.hx-status-bar {
-		display: block;
-		width: 100%;
-		height: 20px;
-		height: var(--status-bar-height);
-	}
+	
 	//防止其他ui影响
 	.hx-navbar uni-view,
 	.hx-navbar uni-scroll-view,
@@ -527,7 +528,7 @@
 		box-sizing: unset;
 	}
 	.hx-navbar {
-		
+		position: relative;
 		padding-top: 0;
 		overflow: hidden;
 		
@@ -535,25 +536,35 @@
 			display: block;
 			position: relative;
 			width: 100%;
-			background-color: $uni-bg-color;
+			/*background-color: $uni-bg-color*/;
 			overflow: hidden;
-			
 			.navbgimg{
 				position: absolute;
 				top: 0;
 				left: 0;
-				
-				z-index: -1;
+				z-index: 0;
 				width: 100%;
 			}
+			
 			.hx-navbar__content_view {
 				// line-height: $nav-height;
 				display: flex;
 				align-items: center;
+				
+			}
+			.hx-status-bar {
+				display: block;
+				width: 100%;
+				height: 20px;
+				height: var(--status-bar-height);
+				position: relative;
+				z-index: 1;
 			}
 		}
 	
 		&__header {
+			position: relative;
+			z-index: 1;
 			display: flex;
 			flex-direction: row;
 			width: 100%;
