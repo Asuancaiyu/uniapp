@@ -603,6 +603,7 @@
 					text-overflow: ellipsis;
 					white-space: nowrap;
 					overflow: hidden;
+					text-align: center;
 					// padding-right: 60upx;
 				}
 			}
