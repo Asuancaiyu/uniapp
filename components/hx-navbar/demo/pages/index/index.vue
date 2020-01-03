@@ -1,6 +1,6 @@
 <template>
 	<view class="ctn">
-		<hx-navbar title="hx-navbar演示hx-navbar演示hx-navbar演示hx-navbar演示" :fixed="true" :back="false" :background-color="[[28, 187, 180],[141, 198, 63]]" color="#ffffff"/>
+		<hx-navbar title="hx-navbar演示" :fixed="true" :back="false" :background-color="[[28, 187, 180],[141, 198, 63]]" color="#ffffff"/>
 		
 		<view style="background: #FFFFFF;padding: 15px;"><text>使用该组件需要用到 uni-icons 图标组件，可自行去下载，或则复制本案例中的uni-icons组件至你的项目也可以的。</text></view>
 		<uni-section title="常用" type="line"></uni-section>
