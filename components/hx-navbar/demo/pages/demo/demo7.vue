@@ -1,11 +1,11 @@
 <template>
 	<view>
 		<hx-navbar 
-			title="新疆了解一下2" 
+			title="新疆了解一下" 
 			:fixed="true"
 			barPlaceholder="hidden"
 			transparent="auto"
-			color="#ffffff"
+			:color="['#000000','#ffffff']"
 			:background-color="[[28, 187, 180],[141, 198, 63]]"/>
 		
 		
